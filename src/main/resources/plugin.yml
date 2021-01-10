@@ -1,0 +1,20 @@
+name: DoubleDoors
+version: ${project.version}
+main: art.ryanstew.doubledoors.DoubleDoors
+api-version: 1.16
+prefix: §7§l[§eDoubleDoors§7§l]§r
+authors: [ CarbonAPI ]
+description: Make doors next to eachother open at the same time!
+website: www.ryanstew.art
+
+commands:
+  doubledoors:
+    description: Enable double doors!
+    usage: /doubledoors
+    aliases: [ddoors, dubdoors]
+    permission: doubledoors.use
+
+permissions:
+  doubledoors.use:
+    description: Permission to use /doubledoors.
+    default: OP
