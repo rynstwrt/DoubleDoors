@@ -15,6 +15,7 @@ public final class DoubleDoors extends JavaPlugin implements Listener
     private ArrayList<UUID> enabledPlayers = new ArrayList<>();
     private FileConfiguration config = getConfig();
 
+
     @Override
     public void onEnable()
     {
