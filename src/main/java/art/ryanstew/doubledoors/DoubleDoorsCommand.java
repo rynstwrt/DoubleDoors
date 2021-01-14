@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 
 public class DoubleDoorsCommand implements CommandExecutor
 {
-    private DoubleDoors plugin;
+    private final DoubleDoors plugin;
 
     public DoubleDoorsCommand(DoubleDoors plugin)
     {
@@ -28,21 +28,19 @@ public class DoubleDoorsCommand implements CommandExecutor
 
         Player player = (Player) sender;
 
-        if (plugin.playerHasEnabled(player))
+        if (plugin.getDoubleDoorsEvents().playerHasEnabled(player))
         {
-            plugin.removePlayerFromEnabled(player);
+            plugin.getDoubleDoorsEvents().removePlayerFromEnabled(player);
             sender.sendMessage("\n");
             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.getPrefix() + "&aSuccessfully disabled double doors!"));
-            sender.sendMessage("\n");
-            return true;
         }
         else
         {
-            plugin.addPlayerToEnabled(player);
+            plugin.getDoubleDoorsEvents().addPlayerToEnabled(player);
             sender.sendMessage("\n");
             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.getPrefix() + "&aSuccessfully enabled double doors!"));
-            sender.sendMessage("\n");
-            return true;
         }
+        sender.sendMessage("\n");
+        return true;
     }
 }

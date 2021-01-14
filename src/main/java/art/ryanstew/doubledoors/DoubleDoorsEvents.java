@@ -2,10 +2,11 @@ package art.ryanstew.doubledoors;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.Tag;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.type.Door;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -14,17 +15,23 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 
 public class DoubleDoorsEvents implements Listener
 {
     private final DoubleDoors plugin;
-    private final ArrayList<Material> DOORS = new ArrayList<>(Arrays.asList(Material.OAK_DOOR, Material.SPRUCE_DOOR, Material.BIRCH_DOOR, Material.ACACIA_DOOR, Material.JUNGLE_DOOR, Material.DARK_OAK_DOOR, Material.CRIMSON_DOOR, Material.WARPED_DOOR));
+    private final FileConfiguration config;
+    private final Set<UUID> enabledPlayers = new HashSet<>();
 
     public DoubleDoorsEvents(DoubleDoors plugin)
     {
         this.plugin = plugin;
+        config = plugin.getConfig();
+    }
+
+    private boolean blockIsADoor(Block block)
+    {
+        return Tag.WOODEN_DOORS.isTagged(block.getType());
     }
 
     private Location getPartnerDoorLocation(World world, Block block)
@@ -37,7 +44,7 @@ public class DoubleDoorsEvents implements Listener
 
         for (Block b : blocks)
         {
-            if (!DOORS.contains(b.getType())) continue;
+            if (!blockIsADoor(b)) continue;
 
             Door door = (Door) b.getBlockData();
 
@@ -51,6 +58,49 @@ public class DoubleDoorsEvents implements Listener
         return null;
     }
 
+    public void setDefaults()
+    {
+        config.addDefault("enabled-players", "");
+        config.options().copyDefaults(true);
+        plugin.saveConfig();
+    }
+
+    public boolean playerHasEnabled(Player player)
+    {
+        return enabledPlayers.contains(player.getUniqueId());
+    }
+
+    public void addPlayerToEnabled(Player player)
+    {
+        enabledPlayers.add(player.getUniqueId());
+    }
+
+    public void removePlayerFromEnabled(Player player)
+    {
+        enabledPlayers.remove(player.getUniqueId());
+    }
+
+    private boolean playerInConfig(Player player)
+    {
+        return config.getStringList("enabled-players").contains(player.getUniqueId().toString());
+    }
+
+    private void addPlayerToConfig(Player player)
+    {
+        List<String> configEnabledPlayers = config.getStringList("enabled-players");
+        configEnabledPlayers.add(player.getUniqueId().toString());
+        config.set("enabled-players", configEnabledPlayers);
+        plugin.saveConfig();
+    }
+
+    private void removePlayerFromConfig(Player player)
+    {
+        List<String> configEnabledPlayers = config.getStringList("enabled-players");
+        configEnabledPlayers.remove(player.getUniqueId().toString());
+        config.set("enabled-players", configEnabledPlayers);
+        plugin.saveConfig();
+    }
+
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent e)
     {
@@ -59,9 +109,9 @@ public class DoubleDoorsEvents implements Listener
 
         Player player = e.getPlayer();
 
-        boolean startsClosed = !((Door) block.getBlockData()).isOpen();
+        if (!e.getAction().equals(Action.RIGHT_CLICK_BLOCK) || !blockIsADoor(block) || !playerHasEnabled(player)) return;
 
-        if (!e.getAction().equals(Action.RIGHT_CLICK_BLOCK) || !DOORS.contains(block.getType()) || !plugin.playerHasEnabled(player)) return;
+        boolean startsClosed = !((Door) block.getBlockData()).isOpen();
 
         Location partnerDoorLoc = getPartnerDoorLocation(player.getWorld(), block);
 
@@ -85,7 +135,7 @@ public class DoubleDoorsEvents implements Listener
     public void onPlayerJoin(PlayerJoinEvent e)
     {
         Player player = e.getPlayer();
-        if (!plugin.playerHasEnabled(player) && plugin.playerInConfig(player)) plugin.addPlayerToEnabled(player);
+        if (!playerHasEnabled(player) && playerInConfig(player)) addPlayerToEnabled(player);
     }
 
     @EventHandler
@@ -93,13 +143,13 @@ public class DoubleDoorsEvents implements Listener
     {
         Player player = e.getPlayer();
 
-        if (plugin.playerHasEnabled(player) && !plugin.playerInConfig(player))
+        if (playerHasEnabled(player) && !playerInConfig(player))
         {
-            plugin.addPlayerToConfig(player);
+            addPlayerToConfig(player);
         }
-        else if (!plugin.playerHasEnabled(player) && plugin.playerInConfig(player))
+        else if (!playerHasEnabled(player) && playerInConfig(player))
         {
-            plugin.removePlayerFromConfig(player);
+            removePlayerFromConfig(player);
         }
     }
 }
