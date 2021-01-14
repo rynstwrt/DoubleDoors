@@ -7,7 +7,6 @@ import java.util.Objects;
 
 public final class DoubleDoors extends JavaPlugin implements Listener
 {
-    private final String PREFIX = "&7&l[&a&lOTBDD&7&l]&r ";
     private DoubleDoorsEvents doubleDoorsEvents;
 
     @Override
@@ -28,7 +27,7 @@ public final class DoubleDoors extends JavaPlugin implements Listener
 
     public String getPrefix()
     {
-        return PREFIX;
+        return "&7&l[&a&lOTBDD&7&l]&r ";
     }
 
     public DoubleDoorsEvents getDoubleDoorsEvents()

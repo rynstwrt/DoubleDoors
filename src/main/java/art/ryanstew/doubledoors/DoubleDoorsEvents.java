@@ -29,9 +29,9 @@ public class DoubleDoorsEvents implements Listener
         config = plugin.getConfig();
     }
 
-    private boolean blockIsADoor(Block block)
+    private boolean blockIsNotADoor(Block block)
     {
-        return Tag.WOODEN_DOORS.isTagged(block.getType());
+        return !Tag.WOODEN_DOORS.isTagged(block.getType());
     }
 
     private Location getPartnerDoorLocation(World world, Block block)
@@ -44,7 +44,7 @@ public class DoubleDoorsEvents implements Listener
 
         for (Block b : blocks)
         {
-            if (!blockIsADoor(b)) continue;
+            if (blockIsNotADoor(b)) continue;
 
             Door door = (Door) b.getBlockData();
 
@@ -109,7 +109,7 @@ public class DoubleDoorsEvents implements Listener
 
         Player player = e.getPlayer();
 
-        if (!e.getAction().equals(Action.RIGHT_CLICK_BLOCK) || !blockIsADoor(block) || !playerHasEnabled(player)) return;
+        if (!e.getAction().equals(Action.RIGHT_CLICK_BLOCK) || blockIsNotADoor(block) || !playerHasEnabled(player)) return;
 
         boolean startsClosed = !((Door) block.getBlockData()).isOpen();
 
